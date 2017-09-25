@@ -52,12 +52,14 @@ for iteration in opts.num_iters:
   for (e_i, f_j) in t_ef.keys():
     t_ef[(e_i, f_j)] = count_ef[(e_i, f_j)] / total_f[f_j]
 
-
-
-
-for (f, e) in bitext:
-  for (i, f_i) in enumerate(f): 
-    for (j, e_j) in enumerate(e):
-      if dice[(f_i,e_j)] >= opts.threshold:
-        sys.stdout.write("%i-%i " % (i,j))
+# generate optimal alignments
+for (e, f) in bitext:
+  for (i, e_i) in enumerate(e): 
+    best_prob = 0
+    best_j = 0
+    for (j, f_j) in enumerate(f):
+      if t_ef[(e_i, f_j)] > best_prob:
+        best_prob = t_ef[(e_i, f_j)]
+        best_j = j
+    sys.stdout.write("%i-%i " % (i, best_j))
   sys.stdout.write("\n")
