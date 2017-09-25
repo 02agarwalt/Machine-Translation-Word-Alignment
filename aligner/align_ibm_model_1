@@ -19,47 +19,47 @@ e_data = "%s.%s" % (opts.train, opts.english)
 sys.stderr.write("Training with IBM Model 1............")
 # IBM Model 1 pseudocode obtained from http://mt-class.org/jhu/slides/lecture-ibm-model1.pdf
 
-bitext = [[sentence.strip().split() for sentence in pair] for pair in zip(open(e_data), open(f_data))[:opts.num_sents]]
-t_ef = {}
-for (n, (e, f)) in enumerate(bitext):
-  for e_i in set(e):
-    for f_j in set(f):
-      t_ef[(e_i, f_j)] = 0.25 # uniform initialization
+bitext = [[sentence.strip().split() for sentence in pair] for pair in zip(open(f_data), open(e_data))[:opts.num_sents]]
+t_fe = {}
+for (n, (f, e)) in enumerate(bitext):
+  for f_i in set(f):
+    for e_j in set(e):
+      t_fe[(f_i, e_j)] = 0.25 # uniform initialization
 
 for iteration in opts.num_iters:
   # initialize counts and totals
-  count_ef = {}
-  total_f = {}
-  for (e_i, f_j) in t_ef.keys():
-    count_ef[(e_i, f_j)] = 0
-    total_f[f_j] = 0
+  count_fe = {}
+  total_e = {}
+  for (f_i, e_j) in t_fe.keys():
+    count_fe[(f_i, e_j)] = 0
+    total_e[e_j] = 0
 
-  for (e, f) in bitext:
+  for (f, e) in bitext:
     # compute normalization
     s_total = {}
-    for e_i in set(e):
-      s_total[e_i] = 0
-      for f_j in set(f):
-        s_total[e_i] += t_ef[(e_i, f_j)]
+    for f_i in set(f):
+      s_total[f_i] = 0
+      for e_j in set(e):
+        s_total[f_i] += t_fe[(f_i, e_j)]
 
     # collect counts
-    for e_i in set(e):
-      for f_j in set(f):
-        count_ef[(e_i, f_j)] += ( t_ef[(e_i, f_j)] / s_total[e_i] )
-        total_f[f_j] += ( t_ef[(e_i, f_j)] / s_total[e_i] )
+    for f_i in set(f):
+      for e_j in set(e):
+        count_fe[(f_i, e_j)] += ( t_fe[(f_i, e_j)] / s_total[f_i] )
+        total_e[e_j] += ( t_fe[(f_i, e_j)] / s_total[f_i] )
 
   # estimate probabilities
-  for (e_i, f_j) in t_ef.keys():
-    t_ef[(e_i, f_j)] = count_ef[(e_i, f_j)] / total_f[f_j]
+  for (f_i, e_j) in t_fe.keys():
+    t_fe[(f_i, e_j)] = count_fe[(f_i, e_j)] / total_e[e_j]
 
 # generate optimal alignments
-for (e, f) in bitext:
-  for (i, e_i) in enumerate(e): 
+for (f, e) in bitext:
+  for (i, f_i) in enumerate(f): 
     best_prob = 0
     best_j = 0
-    for (j, f_j) in enumerate(f):
-      if t_ef[(e_i, f_j)] > best_prob:
-        best_prob = t_ef[(e_i, f_j)]
+    for (j, e_j) in enumerate(e):
+      if t_fe[(f_i, e_j)] > best_prob:
+        best_prob = t_fe[(f_i, e_j)]
         best_j = j
     sys.stdout.write("%i-%i " % (i, best_j))
   sys.stdout.write("\n")
