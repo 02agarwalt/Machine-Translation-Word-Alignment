@@ -16,7 +16,7 @@ optparser.add_option("-n", "--num_sentences", dest="num_sents", default=sys.maxi
 f_data = "%s.%s" % (opts.train, opts.french)
 e_data = "%s.%s" % (opts.train, opts.english)
 
-sys.stderr.write("Training with IBM Model 1............")
+sys.stderr.write("Training with IBM Model 1............\n")
 # IBM Model 1 pseudocode obtained from http://mt-class.org/jhu/slides/lecture-ibm-model1.pdf
 
 bitext = [[sentence.strip().split() for sentence in pair] for pair in zip(open(f_data), open(e_data))[:opts.num_sents]]
@@ -26,7 +26,9 @@ for (n, (f, e)) in enumerate(bitext):
     for e_j in set(e):
       t_fe[(f_i, e_j)] = 0.25 # uniform initialization
 
-for iteration in opts.num_iters:
+for iteration in range(0, opts.num_iters):
+  sys.stderr.write("Iteration " + str(iteration) + "\n")
+  sys.stderr.write("Initializing counts\n")
   # initialize counts and totals
   count_fe = {}
   total_e = {}
@@ -34,7 +36,8 @@ for iteration in opts.num_iters:
     count_fe[(f_i, e_j)] = 0
     total_e[e_j] = 0
 
-  for (f, e) in bitext:
+  for (n, (f, e)) in enumerate(bitext):
+    sys.stderr.write("Sentence " + str(n) + "\n")
     # compute normalization
     s_total = {}
     for f_i in set(f):
@@ -49,9 +52,11 @@ for iteration in opts.num_iters:
         total_e[e_j] += ( t_fe[(f_i, e_j)] / s_total[f_i] )
 
   # estimate probabilities
+  sys.stderr.write("Estimating probabilities\n")
   for (f_i, e_j) in t_fe.keys():
     t_fe[(f_i, e_j)] = count_fe[(f_i, e_j)] / total_e[e_j]
 
+sys.stderr.write("Generating alignments...........\n")
 # generate optimal alignments
 for (f, e) in bitext:
   for (i, f_i) in enumerate(f): 
