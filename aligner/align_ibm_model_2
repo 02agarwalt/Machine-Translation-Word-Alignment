@@ -16,7 +16,7 @@ optparser.add_option("-n", "--num_sentences", dest="num_sents", default=sys.maxi
 f_data = "%s.%s" % (opts.train, opts.french)
 e_data = "%s.%s" % (opts.train, opts.english)
 
-sys.stderr.write("Training with IBM Model 1............\n")
+sys.stderr.write("Initializing estimates with IBM Model 1............\n")
 # IBM Model 1 pseudocode obtained from http://mt-class.org/jhu/slides/lecture-ibm-model1.pdf
 
 bitext = [[sentence.strip().split() for sentence in pair] for pair in zip(open(f_data), open(e_data))[:opts.num_sents]]
@@ -56,6 +56,59 @@ for iteration in range(0, opts.num_iters):
   for (f_i, e_j) in t_fe.keys():
     t_fe[(f_i, e_j)] = count_fe[(f_i, e_j)] / total_e[e_j]
 
+
+sys.stderr.write("Training model with IBM Model 2............\n")
+# IBM Model 2 pseudocode obtained from http://www.cs.columbia.edu/~mcollins/courses/nlp2011/notes/ibm12.pdf
+
+q_jilm = {}
+for (n, (f, e)) in enumerate(bitext):
+  for (i, f_i) in enumerate(f):
+    for (j, e_j) in enumerate(e):
+      l = len(e)
+      m = len(f)
+      q_jilm[(j, i, l, m)] = 0.25 # uniform initialization
+
+for iteration in range(0, opts.num_iters):
+  sys.stderr.write("Iteration " + str(iteration) + "\n")
+  sys.stderr.write("Initializing counts\n")
+  # initialize counts and totals
+  count_fe = {}
+  count_e = {}
+  count_jilm = {}
+  count_ilm = {}
+  for (f_i, e_j) in t_fe.keys():
+    count_fe[(f_i, e_j)] = 0
+    count_e[e_j] = 0
+  for (j, i, l, m) in q_jilm.keys():
+    count_jilm[(j, i, l, m)] = 0
+    count_ilm[(i, l, m)] = 0
+
+  for (n, (f, e)) in enumerate(bitext):
+    # sys.stderr.write("Sentence " + str(n) + "\n")
+    # compute normalization
+    s_total = {}
+    for (i, f_i) in enumerate(f):
+      s_total[i] = 0
+      for (j, e_j) in enumerate(e):
+        s_total[i] += ( q_jilm[(j, i, len(e), len(f))] * t_fe[(f_i, e_j)] )
+
+    # collect counts
+    for (i, f_i) in enumerate(f):
+      for (j, e_j) in enumerate(e):
+        delta = ( q_jilm[(j, i, len(e), len(f))] * t_fe[(f_i, e_j)] ) / s_total[i]
+        count_fe[(f_i, e_j)] += delta
+        count_e[e_j] += delta
+        count_jilm[(j, i, len(e), len(f))] += delta
+        count_ilm[(i, len(e), len(f))] += delta
+
+  # estimate probabilities
+  sys.stderr.write("Estimating probabilities\n")
+  for (f_i, e_j) in t_fe.keys():
+    t_fe[(f_i, e_j)] = count_fe[(f_i, e_j)] / count_e[e_j]
+  for (j, i, l, m) in q_jilm.keys():
+    q_jilm[(j, i, l, m)] = count_jilm[(j, i, l, m)] / count_ilm[(i, l, m)]
+
+
 sys.stderr.write("Generating alignments...........\n")
 # generate optimal alignments
 for (f, e) in bitext:
@@ -63,8 +116,9 @@ for (f, e) in bitext:
     best_prob = 0
     best_j = 0
     for (j, e_j) in enumerate(e):
-      if t_fe[(f_i, e_j)] > best_prob:
-        best_prob = t_fe[(f_i, e_j)]
+      if t_fe[(f_i, e_j)] * q_jilm[(j, i, len(e), len(f))] > best_prob:
+        best_prob = t_fe[(f_i, e_j)] * q_jilm[(j, i, len(e), len(f))]
         best_j = j
     sys.stdout.write("%i-%i " % (i, best_j))
   sys.stdout.write("\n")
+
