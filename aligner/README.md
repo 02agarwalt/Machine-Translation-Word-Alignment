@@ -1,4 +1,4 @@
-There are three python programs here (`-h` for usage):
+There are several python programs here (`-h` for usage):
 
 -`./align_dice` aligns words using the Dice coefficient method.
 
