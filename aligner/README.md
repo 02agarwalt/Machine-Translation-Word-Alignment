@@ -1,15 +1,15 @@
 There are three python programs here (`-h` for usage):
 
--`./align` aligns words.
+-`./align_dice` aligns words using the Dice coefficient method.
+
+-`./align_ibm_model_1` aligns words using IBM Model 1.
 
 -`./check-alignments` checks that the entire dataset is aligned, and
   that there are no out-of-bounds alignment points.
 
 -`./score-alignments` computes alignment error rate.
 
-The commands work in a pipeline. For instance:
-
-   > ./align -t 0.9 -n 1000 | ./check | ./grade -n 5
+The scripts output alignments to stdout, so you should use output piping.
 
 The `data` directory contains a fragment of the Canadian Hansards,
 aligned by Ulrich Germann:
