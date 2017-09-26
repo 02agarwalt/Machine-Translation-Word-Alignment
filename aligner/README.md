@@ -4,6 +4,8 @@ There are three python programs here (`-h` for usage):
 
 -`./align_ibm_model_1` aligns words using IBM Model 1.
 
+-`./align_ibm_model_2` aligns words using IBM Model 2.
+
 -`./check-alignments` checks that the entire dataset is aligned, and
   that there are no out-of-bounds alignment points.
 
