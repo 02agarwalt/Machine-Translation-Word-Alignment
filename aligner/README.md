@@ -4,11 +4,11 @@ There are several python programs here (`-h` for usage):
 
 -`./align_ibm_model_1` aligns words using IBM Model 1.
 
--`./align_ibm_model_1_bidirectional` aligns words using IBM Model 1 and incorporates both translation directions when predicting alignments.
+-`./align_ibm_model_1_bidirectional` aligns words using IBM Model 1 and incorporates both translation directions when predicting alignments (independently trained).
 
 -`./align_ibm_model_2` aligns words using IBM Model 2.
 
--`./align_ibm_model_2_bidirectional` aligns words using IBM Model 2 and incorporates both translation directions when predicting alignments.
+-`./align_ibm_model_2_bidirectional` aligns words using IBM Model 2 and incorporates both translation directions when predicting alignments (independently trained).
 
 -`./check-alignments` checks that the entire dataset is aligned, and
   that there are no out-of-bounds alignment points.
