@@ -155,7 +155,7 @@ for iteration in range(0, opts.num_iters):
 
 # MODEL 2 DIRECTION 2
 
-sys.stderr.write("Training model with IBM Model 2 in direction 1............\n")
+sys.stderr.write("Training model with IBM Model 2 in direction 2............\n")
 # IBM Model 2 pseudocode obtained from http://www.cs.columbia.edu/~mcollins/courses/nlp2011/notes/ibm12.pdf
 
 q_jilm2 = {}
